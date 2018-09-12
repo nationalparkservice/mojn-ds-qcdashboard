@@ -1,0 +1,35 @@
+---
+title: "Desert Springs Data Exploration"
+output: html_notebook
+---
+```{r loadpackages}
+library(RODBC)
+library(tidyverse)
+```
+
+## Connecting to the database
+```{r}
+DS.dsn <- 'driver={SQL Server Native Client 11.0};server=INPLAKE52V\\MOJN;database=MOJN_DS_Water;trusted_connection=Yes;applicationintent=readonly'
+DS.conn <- odbcDriverConnect(DS.dsn)
+
+# Read data from analysis views in MOJN_DS_Water database
+
+site <- sqlFetch(DS.conn, "analysis.Site")
+visit <- sqlFetch(DS.conn, "analysis.Visit")
+visit.activity <- sqlFetch(DS.conn, "analysis.VisitActivity")
+wq.DO <- sqlFetch(DS.conn, "analysis.WaterQualityDO")
+wq.pH <- sqlFetch(DS.conn, "analysis.WaterQualitypH")
+wq.SpCond <- sqlFetch(DS.conn, "analysis.WaterQualitySpCond")
+wq.tempC <- sqlFetch(DS.conn, "analysis.WaterQualityTemperature")
+discharge.estimated <- sqlFetch(DS.conn, "analysis.DischargeEstimated")
+discharge.flow <- sqlFetch(DS.conn, "analysis.DischargeFlowCondition")
+discharge.volumetric <- sqlFetch(DS.conn, "analysis.DischargeVolumetric")
+disturbance <- sqlFetch(DS.conn, "analysis.Disturbance")
+disturbance.flowmod <- sqlFetch(DS.conn, "analysis.DisturbanceFlowModification")
+invasives <- sqlFetch(DS.conn, "analysis.Invasives")
+riparian <- sqlFetch(DS.conn, "analysis.Riparian")
+wildlife <- sqlFetch(DS.conn, "analysis.Wildlife")
+
+# Close database connection
+close(DS.conn)
+```
