@@ -8,17 +8,24 @@ library(tidyverse)
 ```
 
 ```{r functions}
-selectNA <- function(data, drop.complete.cols = FALSE, cols.to.keep = "") {
+selectNA <- function(data, drop.complete.cols = FALSE, cols.to.keep = NA, cols.to.ignore = NA) {
   # Given a data frame, returns only the rows that contain NA values. Optionally, omits columns that are not missing any data.
   #
   # Args:
   #   data: a data frame or tibble
+  #   cols.to.ignore: a charcter vector of the names of the columns that should not be checked for missing data.
   #   drop.complete.cols: boolean value indicating whether the result should omit columns that aren't missing data.
   #   cols.to.keep: a character vector containing the names of the columns that should be returned even if drop.complete.cols is set to TRUE.
   
   # filter data to only include rows that contain one or more NA
-  na.list <- data %>%
+  if (anyNA(cols.to.ignore)) {
+    na.list <- data %>%
     filter_all(any_vars(is.na(.)))
+  } else {
+    na.list <- data %>%
+    filter_at(vars(-cols.to.ignore), any_vars(is.na(.)))
+  }
+  
   
   # get list of columns that contain NA's
   na.cols <- na.list %>% 
@@ -27,7 +34,7 @@ selectNA <- function(data, drop.complete.cols = FALSE, cols.to.keep = "") {
 
   # if user opts to drop columns that aren't missing data, return tibble of rows and columns containing NA values, plus any additional columns specified by cols.to.keep
   if (drop.complete.cols) {
-    if ("" %in% cols.to.keep &length(cols.to.keep) == 1) {
+    if (anyNA(cols.to.keep)) {
       na.list <- na.list %>% 
       select(na.cols)
     } else {
