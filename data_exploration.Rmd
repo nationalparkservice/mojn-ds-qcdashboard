@@ -1,10 +1,12 @@
 ---
 title: "Desert Springs Data Exploration"
 output: html_notebook
+runtime: shiny
 ---
 ```{r loadpackages}
 library(RODBC)
 library(tidyverse)
+library(shiny)
 ```
 
 ```{r functions}
@@ -94,8 +96,34 @@ na.site
 ```
 There are `r nrow(na.site)` sites that are missing data. Any rows missing data are displayed above.
 
+#### Actively Monitored Springs
+
+```{r}
+selectInput("park", label = "Select a park to view the list of springs that are actively monitored there", choices = unique(site$ParkCode))
+```
+
+Annual springs:
+```{r}
+renderTable({
+  annual <- site %>%
+  filter((ParkCode == input$park) & (SampleFrame == "Annual")) %>%
+  select(SiteCode, SiteName)
+  annual
+})
+```
+
+3-year springs:
+```{r}
+renderTable({
+  three.yr <- site %>%
+  filter((ParkCode == input$park) & (SampleFrame == "3Yr")) %>%
+  select(SiteCode, SiteName)
+  three.yr
+})
+```
+
 ### Visit
-```{r visit}
+```{r}
 visit
 ```
 
