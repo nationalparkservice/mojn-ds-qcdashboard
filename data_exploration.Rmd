@@ -135,3 +135,198 @@ na.visit <- visit %>%
 na.visit
 ```
 There are `r nrow(na.visit)` visits that are missing data. Any rows missing data are displayed above.
+
+
+### Visit Activity
+```{r}
+visit.activity
+```
+
+#### Checking for NA values
+
+```{r}
+na.visit.activity <- visit.activity %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+na.visit.activity
+```
+There are `r nrow(na.visit.activity)` visits that are missing data. Any rows missing data are displayed above.
+
+
+### Water Quality - DO
+```{r}
+wq.DO
+```
+
+#### Checking for NA values
+
+```{r}
+na.wq.DO <- wq.DO %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
+na.wq.DO
+```
+There are `r nrow(na.wq.DO)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Water Quality - pH
+```{r}
+wq.pH
+```
+
+#### Checking for NA values
+
+```{r}
+na.wq.pH <- wq.pH %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
+na.wq.pH
+```
+There are `r nrow(na.wq.pH)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Water Quality - SpCond
+```{r}
+wq.SpCond
+```
+
+#### Checking for NA values
+
+```{r}
+na.wq.SpCond <- wq.SpCond %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
+na.wq.SpCond
+```
+There are `r nrow(na.wq.SpCond)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Water Quality - Temperature
+```{r}
+wq.tempC
+```
+
+#### Checking for NA values
+
+```{r}
+na.wq.tempC <- wq.tempC %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
+na.wq.tempC
+```
+There are `r nrow(na.wq.tempC)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Discharge - Estimated
+```{r}
+discharge.estimated
+```
+
+#### Checking for NA values
+
+```{r}
+na.discharge.est <- discharge.estimated %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DischargeFlag"))
+na.discharge.est
+```
+There are `r nrow(na.discharge.est)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Discharge - Volumetric
+```{r}
+discharge.volumetric
+```
+
+#### Checking for NA values
+
+```{r}
+na.discharge.est <- discharge.estimated %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DischargeFlag"))
+na.discharge.est
+```
+There are `r nrow(na.discharge.est)` records that are missing data. Any rows missing data are displayed above.
+
+### Discharge - Flow
+```{r}
+discharge.flow
+```
+
+#### Checking for NA values
+
+```{r}
+na.discharge.flow <- discharge.flow %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+na.discharge.flow
+```
+There are `r nrow(na.discharge.flow)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Disturbance
+```{r}
+disturbance
+```
+
+#### Checking for NA values
+
+```{r}
+na.disturbance <- disturbance %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+na.disturbance
+```
+There are `r nrow(na.disturbance)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Disturbance - Flow Modifications
+```{r}
+disturbance.flowmod
+```
+
+#### Checking for NA values
+
+```{r}
+na.disturbance.flowmod <- disturbance.flowmod %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+na.disturbance.flowmod
+```
+There are `r nrow(na.disturbance.flowmod)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Invasives
+```{r}
+invasives
+```
+
+#### Checking for NA values
+
+```{r}
+na.invasives <- invasives %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+na.invasives
+```
+There are `r nrow(na.invasives)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Riparian Veg
+```{r}
+riparian
+```
+
+#### Checking for NA values
+
+```{r}
+na.riparian <- riparian %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+na.riparian
+```
+There are `r nrow(na.riparian)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Wildilfe
+```{r}
+wildlife
+```
+
+#### Checking for NA values
+
+```{r}
+na.wildlife <- wildlife %>%
+  selectNA(drop.complete.cols = FALSE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+na.wildlife
+```
+There are `r nrow(na.wildlife)` records that are missing data. Any rows missing data are displayed above.
+
