@@ -1,12 +1,18 @@
 ---
 title: "Desert Springs Data Exploration"
-output: html_notebook
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
 runtime: shiny
 ---
-```{r loadpackages}
+```{r loadpackages, echo=FALSE, output=FALSE}
+knitr::opts_chunk$set(echo=FALSE)
 library(RODBC)
 library(tidyverse)
 library(shiny)
+library(DT)
 ```
 
 ```{r functions}
@@ -83,7 +89,7 @@ close(DS.conn)
 
 #### All data
 ```{r site}
-site
+renderDataTable(site)
 ```
 
 #### Checking for NA values
@@ -92,7 +98,7 @@ site
 na.site <- site %>%
   selectNA()
 
-na.site
+renderDataTable(na.site)
 ```
 There are `r nrow(na.site)` sites that are missing data. Any rows missing data are displayed above.
 
@@ -104,7 +110,7 @@ selectInput("park", label = "Select a park to view the list of springs that are 
 
 Annual springs:
 ```{r}
-renderTable({
+renderDataTable({
   annual <- site %>%
   filter((ParkCode == input$park) & (SampleFrame == "Annual")) %>%
   select(SiteCode, SiteName)
@@ -114,7 +120,7 @@ renderTable({
 
 3-year springs:
 ```{r}
-renderTable({
+renderDataTable({
   three.yr <- site %>%
   filter((ParkCode == input$park) & (SampleFrame == "3Yr")) %>%
   select(SiteCode, SiteName)
@@ -122,9 +128,12 @@ renderTable({
 })
 ```
 
+Map:
+
+
 ### Visit
 ```{r}
-visit
+renderDataTable(visit)
 ```
 
 #### Checking for NA values
@@ -132,14 +141,14 @@ visit
 ```{r}
 na.visit <- visit %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
-na.visit
+renderDataTable(na.visit)
 ```
 There are `r nrow(na.visit)` visits that are missing data. Any rows missing data are displayed above.
 
 
 ### Visit Activity
 ```{r}
-visit.activity
+renderDataTable(visit.activity)
 ```
 
 #### Checking for NA values
@@ -147,14 +156,14 @@ visit.activity
 ```{r}
 na.visit.activity <- visit.activity %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
-na.visit.activity
+renderDataTable(na.visit.activity)
 ```
 There are `r nrow(na.visit.activity)` visits that are missing data. Any rows missing data are displayed above.
 
 
 ### Water Quality - DO
 ```{r}
-wq.DO
+renderDataTable(wq.DO)
 ```
 
 #### Checking for NA values
@@ -162,14 +171,14 @@ wq.DO
 ```{r}
 na.wq.DO <- wq.DO %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
-na.wq.DO
+renderDataTable(na.wq.DO)
 ```
 There are `r nrow(na.wq.DO)` records that are missing data. Any rows missing data are displayed above.
 
 
 ### Water Quality - pH
 ```{r}
-wq.pH
+renderDataTable(wq.pH)
 ```
 
 #### Checking for NA values
@@ -177,14 +186,14 @@ wq.pH
 ```{r}
 na.wq.pH <- wq.pH %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
-na.wq.pH
+renderDataTable(na.wq.pH)
 ```
 There are `r nrow(na.wq.pH)` records that are missing data. Any rows missing data are displayed above.
 
 
 ### Water Quality - SpCond
 ```{r}
-wq.SpCond
+renderDataTable(wq.SpCond)
 ```
 
 #### Checking for NA values
@@ -192,14 +201,14 @@ wq.SpCond
 ```{r}
 na.wq.SpCond <- wq.SpCond %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
-na.wq.SpCond
+renderDataTable(na.wq.SpCond)
 ```
 There are `r nrow(na.wq.SpCond)` records that are missing data. Any rows missing data are displayed above.
 
 
 ### Water Quality - Temperature
 ```{r}
-wq.tempC
+renderDataTable(wq.tempC)
 ```
 
 #### Checking for NA values
@@ -207,14 +216,14 @@ wq.tempC
 ```{r}
 na.wq.tempC <- wq.tempC %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
-na.wq.tempC
+renderDataTable(na.wq.tempC)
 ```
 There are `r nrow(na.wq.tempC)` records that are missing data. Any rows missing data are displayed above.
 
 
 ### Discharge - Estimated
 ```{r}
-discharge.estimated
+renderDataTable(discharge.estimated)
 ```
 
 #### Checking for NA values
@@ -222,14 +231,14 @@ discharge.estimated
 ```{r}
 na.discharge.est <- discharge.estimated %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DischargeFlag"))
-na.discharge.est
+renderDataTable(na.discharge.est)
 ```
 There are `r nrow(na.discharge.est)` records that are missing data. Any rows missing data are displayed above.
 
 
 ### Discharge - Volumetric
 ```{r}
-discharge.volumetric
+renderDataTable(discharge.volumetric)
 ```
 
 #### Checking for NA values
@@ -237,13 +246,13 @@ discharge.volumetric
 ```{r}
 na.discharge.est <- discharge.estimated %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DischargeFlag"))
-na.discharge.est
+renderDataTable(na.discharge.est)
 ```
 There are `r nrow(na.discharge.est)` records that are missing data. Any rows missing data are displayed above.
 
 ### Discharge - Flow
 ```{r}
-discharge.flow
+renderDataTable(discharge.flow)
 ```
 
 #### Checking for NA values
@@ -251,14 +260,14 @@ discharge.flow
 ```{r}
 na.discharge.flow <- discharge.flow %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
-na.discharge.flow
+renderDataTable(na.discharge.flow)
 ```
 There are `r nrow(na.discharge.flow)` records that are missing data. Any rows missing data are displayed above.
 
 
 ### Disturbance
 ```{r}
-disturbance
+renderDataTable(disturbance)
 ```
 
 #### Checking for NA values
@@ -266,14 +275,14 @@ disturbance
 ```{r}
 na.disturbance <- disturbance %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
-na.disturbance
+renderDataTable(na.disturbance)
 ```
 There are `r nrow(na.disturbance)` records that are missing data. Any rows missing data are displayed above.
 
 
 ### Disturbance - Flow Modifications
 ```{r}
-disturbance.flowmod
+renderDataTable(disturbance.flowmod)
 ```
 
 #### Checking for NA values
@@ -281,14 +290,14 @@ disturbance.flowmod
 ```{r}
 na.disturbance.flowmod <- disturbance.flowmod %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
-na.disturbance.flowmod
+renderDataTable(na.disturbance.flowmod)
 ```
 There are `r nrow(na.disturbance.flowmod)` records that are missing data. Any rows missing data are displayed above.
 
 
 ### Invasives
 ```{r}
-invasives
+renderDataTable(invasives)
 ```
 
 #### Checking for NA values
@@ -296,14 +305,14 @@ invasives
 ```{r}
 na.invasives <- invasives %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
-na.invasives
+renderDataTable(na.invasives)
 ```
 There are `r nrow(na.invasives)` records that are missing data. Any rows missing data are displayed above.
 
 
 ### Riparian Veg
 ```{r}
-riparian
+renderDataTable(riparian)
 ```
 
 #### Checking for NA values
@@ -311,14 +320,14 @@ riparian
 ```{r}
 na.riparian <- riparian %>%
   selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
-na.riparian
+renderDataTable(na.riparian)
 ```
 There are `r nrow(na.riparian)` records that are missing data. Any rows missing data are displayed above.
 
 
 ### Wildilfe
 ```{r}
-wildlife
+renderDataTable(wildlife)
 ```
 
 #### Checking for NA values
@@ -326,7 +335,7 @@ wildlife
 ```{r}
 na.wildlife <- wildlife %>%
   selectNA(drop.complete.cols = FALSE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
-na.wildlife
+renderDataTable(na.wildlife)
 ```
 There are `r nrow(na.wildlife)` records that are missing data. Any rows missing data are displayed above.
 
