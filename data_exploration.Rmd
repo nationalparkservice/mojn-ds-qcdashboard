@@ -58,7 +58,11 @@ selectNA <- function(data, drop.complete.cols = FALSE, cols.to.keep = NA, cols.t
 
 ## Connecting to the database
 ```{r}
-DS.dsn <- 'driver={SQL Server Native Client 11.0};server=INPLAKE52V\\MOJN;database=MOJN_DS_Water;trusted_connection=Yes;applicationintent=readonly'
+# DS.dsn <- 'driver={SQL Server Native Client 11.0};server=INPLAKE52V\\MOJN;database=MOJN_DS_Water;trusted_connection=Yes;applicationintent=readonly'
+# DS.conn <- odbcDriverConnect(DS.dsn)
+
+# for testing on Sarah's local SQL server instance
+DS.dsn <- 'driver={SQL Server Native Client 11.0};server=INPLAKE36792JNX\\SARAH_LOCAL;database=Testing_MOJN_DS_Water;trusted_connection=Yes;applicationintent=readonly'
 DS.conn <- odbcDriverConnect(DS.dsn)
 
 # Read data from analysis views in MOJN_DS_Water database
