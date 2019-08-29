@@ -1,35 +1,345 @@
 ---
 title: "Desert Springs Data Exploration"
-output: html_notebook
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+runtime: shiny
 ---
-```{r loadpackages}
+```{r loadpackages, echo=FALSE, output=FALSE}
+knitr::opts_chunk$set(echo=FALSE)
 library(RODBC)
 library(tidyverse)
+library(shiny)
+library(DT)
+```
+
+```{r functions}
+selectNA <- function(data, drop.complete.cols = FALSE, cols.to.keep = NA, cols.to.ignore = NA) {
+  # Given a data frame, returns only the rows that contain NA values. Optionally, omits columns that are not missing any data.
+  #
+  # Args:
+  #   data: a data frame or tibble
+  #   cols.to.ignore: a charcter vector of the names of the columns that should not be checked for missing data.
+  #   drop.complete.cols: boolean value indicating whether the result should omit columns that aren't missing data.
+  #   cols.to.keep: a character vector containing the names of the columns that should be returned even if drop.complete.cols is set to TRUE.
+  
+  # filter data to only include rows that contain one or more NA
+  if (anyNA(cols.to.ignore)) {
+    na.list <- data %>%
+    filter_all(any_vars(is.na(.)))
+  } else {
+    na.list <- data %>%
+    filter_at(vars(-cols.to.ignore), any_vars(is.na(.)))
+  }
+  
+  
+  # get list of columns that contain NA's
+  na.cols <- na.list %>% 
+    select_if(anyNA) %>%
+    names()
+
+  # if user opts to drop columns that aren't missing data, return tibble of rows and columns containing NA values, plus any additional columns specified by cols.to.keep
+  if (drop.complete.cols) {
+    if (anyNA(cols.to.keep)) {
+      na.list <- na.list %>% 
+      select(na.cols)
+    } else {
+      na.list <- na.list %>% 
+      select(c(cols.to.keep, na.cols))
+    }
+  }
+  
+  return(na.list)
+}
+
 ```
 
 ## Connecting to the database
 ```{r}
-DS.dsn <- 'driver={SQL Server Native Client 11.0};server=INPLAKE52V\\MOJN;database=MOJN_DS_Water;trusted_connection=Yes;applicationintent=readonly'
+# DS.dsn <- 'driver={SQL Server Native Client 11.0};server=INPLAKE52V\\MOJN;database=MOJN_DS_Water;trusted_connection=Yes;applicationintent=readonly'
+# DS.conn <- odbcDriverConnect(DS.dsn)
+
+# for testing on Sarah's local SQL server instance
+DS.dsn <- 'driver={SQL Server Native Client 11.0};server=INPLAKE36792JNX\\SARAH_LOCAL;database=Testing_MOJN_DS_Water;trusted_connection=Yes;applicationintent=readonly'
 DS.conn <- odbcDriverConnect(DS.dsn)
 
 # Read data from analysis views in MOJN_DS_Water database
 
-site <- sqlFetch(DS.conn, "analysis.Site")
-visit <- sqlFetch(DS.conn, "analysis.Visit")
-visit.activity <- sqlFetch(DS.conn, "analysis.VisitActivity")
-wq.DO <- sqlFetch(DS.conn, "analysis.WaterQualityDO")
-wq.pH <- sqlFetch(DS.conn, "analysis.WaterQualitypH")
-wq.SpCond <- sqlFetch(DS.conn, "analysis.WaterQualitySpCond")
-wq.tempC <- sqlFetch(DS.conn, "analysis.WaterQualityTemperature")
-discharge.estimated <- sqlFetch(DS.conn, "analysis.DischargeEstimated")
-discharge.flow <- sqlFetch(DS.conn, "analysis.DischargeFlowCondition")
-discharge.volumetric <- sqlFetch(DS.conn, "analysis.DischargeVolumetric")
-disturbance <- sqlFetch(DS.conn, "analysis.Disturbance")
-disturbance.flowmod <- sqlFetch(DS.conn, "analysis.DisturbanceFlowModification")
-invasives <- sqlFetch(DS.conn, "analysis.Invasives")
-riparian <- sqlFetch(DS.conn, "analysis.Riparian")
-wildlife <- sqlFetch(DS.conn, "analysis.Wildlife")
+site <- sqlFetch(DS.conn, "analysis.Site", as.is = TRUE) %>% as_tibble()
+visit <- sqlFetch(DS.conn, "analysis.Visit", as.is = TRUE) %>% as_tibble()
+visit.activity <- sqlFetch(DS.conn, "analysis.VisitActivity", as.is = TRUE) %>% as_tibble()
+wq.DO <- sqlFetch(DS.conn, "analysis.WaterQualityDO", as.is = TRUE) %>% as_tibble()
+wq.pH <- sqlFetch(DS.conn, "analysis.WaterQualitypH", as.is = TRUE) %>% as_tibble()
+wq.SpCond <- sqlFetch(DS.conn, "analysis.WaterQualitySpCond", as.is = TRUE) %>% as_tibble()
+wq.tempC <- sqlFetch(DS.conn, "analysis.WaterQualityTemperature", as.is = TRUE) %>% as_tibble()
+discharge.estimated <- sqlFetch(DS.conn, "analysis.DischargeEstimated", as.is = TRUE) %>% as_tibble()
+discharge.flow <- sqlFetch(DS.conn, "analysis.DischargeFlowCondition", as.is = TRUE) %>% as_tibble()
+discharge.volumetric <- sqlFetch(DS.conn, "analysis.DischargeVolumetric", as.is = TRUE) %>% as_tibble()
+disturbance <- sqlFetch(DS.conn, "analysis.Disturbance", as.is = TRUE) %>% as_tibble()
+disturbance.flowmod <- sqlFetch(DS.conn, "analysis.DisturbanceFlowModification", as.is = TRUE) %>% as_tibble()
+invasives <- sqlFetch(DS.conn, "analysis.Invasives", as.is = TRUE) %>% as_tibble()
+riparian <- sqlFetch(DS.conn, "analysis.Riparian", as.is = TRUE) %>% as_tibble()
+wildlife <- sqlFetch(DS.conn, "analysis.Wildlife", as.is = TRUE) %>% as_tibble()
 
 # Close database connection
 close(DS.conn)
 ```
+
+## Exploratory analysis
+
+### Site
+
+#### All data
+```{r site}
+renderDataTable(site)
+```
+
+#### Checking for NA values
+
+```{r}
+na.site <- site %>%
+  selectNA()
+
+renderDataTable(na.site)
+```
+There are `r nrow(na.site)` sites that are missing data. Any rows missing data are displayed above.
+
+#### Actively Monitored Springs
+
+```{r}
+selectInput("park", label = "Select a park to view the list of springs that are actively monitored there", choices = unique(site$ParkCode))
+```
+
+Annual springs:
+```{r}
+renderDataTable({
+  annual <- site %>%
+  filter((ParkCode == input$park) & (SampleFrame == "Annual")) %>%
+  select(SiteCode, SiteName)
+  annual
+})
+```
+
+3-year springs:
+```{r}
+renderDataTable({
+  three.yr <- site %>%
+  filter((ParkCode == input$park) & (SampleFrame == "3Yr")) %>%
+  select(SiteCode, SiteName)
+  three.yr
+})
+```
+
+Map:
+
+
+### Visit
+```{r}
+renderDataTable(visit)
+```
+
+#### Checking for NA values
+
+```{r}
+na.visit <- visit %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+renderDataTable(na.visit)
+```
+There are `r nrow(na.visit)` visits that are missing data. Any rows missing data are displayed above.
+
+
+### Visit Activity
+```{r}
+renderDataTable(visit.activity)
+```
+
+#### Checking for NA values
+
+```{r}
+na.visit.activity <- visit.activity %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+renderDataTable(na.visit.activity)
+```
+There are `r nrow(na.visit.activity)` visits that are missing data. Any rows missing data are displayed above.
+
+
+### Water Quality - DO
+```{r}
+renderDataTable(wq.DO)
+```
+
+#### Checking for NA values
+
+```{r}
+na.wq.DO <- wq.DO %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
+renderDataTable(na.wq.DO)
+```
+There are `r nrow(na.wq.DO)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Water Quality - pH
+```{r}
+renderDataTable(wq.pH)
+```
+
+#### Checking for NA values
+
+```{r}
+na.wq.pH <- wq.pH %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
+renderDataTable(na.wq.pH)
+```
+There are `r nrow(na.wq.pH)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Water Quality - SpCond
+```{r}
+renderDataTable(wq.SpCond)
+```
+
+#### Checking for NA values
+
+```{r}
+na.wq.SpCond <- wq.SpCond %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
+renderDataTable(na.wq.SpCond)
+```
+There are `r nrow(na.wq.SpCond)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Water Quality - Temperature
+```{r}
+renderDataTable(wq.tempC)
+```
+
+#### Checking for NA values
+
+```{r}
+na.wq.tempC <- wq.tempC %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DataQualityFlagNote"))
+renderDataTable(na.wq.tempC)
+```
+There are `r nrow(na.wq.tempC)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Discharge - Estimated
+```{r}
+renderDataTable(discharge.estimated)
+```
+
+#### Checking for NA values
+
+```{r}
+na.discharge.est <- discharge.estimated %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DischargeFlag"))
+renderDataTable(na.discharge.est)
+```
+There are `r nrow(na.discharge.est)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Discharge - Volumetric
+```{r}
+renderDataTable(discharge.volumetric)
+```
+
+#### Checking for NA values
+
+```{r}
+na.discharge.est <- discharge.estimated %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"), cols.to.ignore = c("DischargeFlag"))
+renderDataTable(na.discharge.est)
+```
+There are `r nrow(na.discharge.est)` records that are missing data. Any rows missing data are displayed above.
+
+### Discharge - Flow
+```{r}
+renderDataTable(discharge.flow)
+```
+
+#### Checking for NA values
+
+```{r}
+na.discharge.flow <- discharge.flow %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+renderDataTable(na.discharge.flow)
+```
+There are `r nrow(na.discharge.flow)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Disturbance
+```{r}
+renderDataTable(disturbance)
+```
+
+#### Checking for NA values
+
+```{r}
+na.disturbance <- disturbance %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+renderDataTable(na.disturbance)
+```
+There are `r nrow(na.disturbance)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Disturbance - Flow Modifications
+```{r}
+renderDataTable(disturbance.flowmod)
+```
+
+#### Checking for NA values
+
+```{r}
+na.disturbance.flowmod <- disturbance.flowmod %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+renderDataTable(na.disturbance.flowmod)
+```
+There are `r nrow(na.disturbance.flowmod)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Invasives
+```{r}
+renderDataTable(invasives)
+```
+
+#### Checking for NA values
+
+```{r}
+na.invasives <- invasives %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+renderDataTable(na.invasives)
+```
+There are `r nrow(na.invasives)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Riparian Veg
+```{r}
+renderDataTable(riparian)
+```
+
+#### Checking for NA values
+
+```{r}
+na.riparian <- riparian %>%
+  selectNA(drop.complete.cols = TRUE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+renderDataTable(na.riparian)
+```
+There are `r nrow(na.riparian)` records that are missing data. Any rows missing data are displayed above.
+
+
+### Wildilfe
+```{r}
+renderDataTable(wildlife)
+```
+
+#### Checking for NA values
+
+```{r}
+na.wildlife <- wildlife %>%
+  selectNA(drop.complete.cols = FALSE, cols.to.keep = c("ParkCode", "SiteCode", "SiteName", "VisitDate"))
+renderDataTable(na.wildlife)
+```
+There are `r nrow(na.wildlife)` records that are missing data. Any rows missing data are displayed above.
+
